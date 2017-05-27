@@ -5,9 +5,12 @@ INVENTORY_FILE="$DIR/inventory"
 ID_RSA_FILE="$DIR/id_rsa"
 OVERRIDE_VARS_FILE="$DIR/vars.yml"
 PLAYBOOK_FILE="$DIR/../playbook.yml"
+ALLTARGETS=$(grep '\.local' $INVENTORY_FILE | grep -v ';' | sort | uniq)
 TARGETS=$(grep '\.ans\.local' $INVENTORY_FILE | grep -v ';' | sort | uniq)
+DBTARGETS=$(grep '\.db\.local' $INVENTORY_FILE | grep -v ';' | sort | uniq)
 IP_PREFIX="192.168.150"
 DOCKER_IMAGE_NAME="ansible_local_test"
+DOCKER_IMAGE_DB_NAME="ansible_local_test_mongo"
 
 
 cleanup_test_ips() {
@@ -15,7 +18,7 @@ cleanup_test_ips() {
 	grep -v "$IP_PREFIX" /etc/hosts | sudo tee /etc/hosts 1>/dev/null
 
 	counter=1
-	for host in $TARGETS
+	for host in $ALLTARGETS
 	do
 		ip="$IP_PREFIX.$((counter++))"
 		sudo ifconfig lo0 -alias "$ip" 2>/dev/null
@@ -29,7 +32,7 @@ setup_test_ips() {
 
 	echo "Setting up ips and hosts for test containers..."
 	counter=1
-	for host in $TARGETS
+	for host in $ALLTARGETS
 	do
 		ip="$IP_PREFIX.$((counter++))"
 		sudo ifconfig lo0 alias "$ip"
@@ -40,14 +43,16 @@ setup_test_ips() {
 
 
 build_image() {
-	echo "Building test docker image..."
-	cd $DIR && docker build -t "$DOCKER_IMAGE_NAME:latest" . 1>/dev/null
+	echo "Building test docker application image..."
+	# cd $DIR && docker build -f Dockerfile.app . 1>/dev/null
+	echo "Building test docker database image..."
+	cd $DIR && docker build -f Dockerfile.dbapp . 1>/dev/null
 	echo "	Done."
 }
 
 
 start_containers() {
-	echo "Starting test docker containers..."
+	echo "Starting test docker app containers..."
 	links=""
 	counter=1
 
@@ -66,7 +71,25 @@ start_containers() {
 			-v /var/run/docker.sock:/var/run/docker.sock \
 			"$DOCKER_IMAGE_NAME:latest" 1>/dev/null
 	done
-	echo "	Done."
+	echo "	app containers have been started."
+
+	echo " Starting the db container"
+	for dbhost in $DBTARGETS
+	do
+		docker rm -f "$dbhost" &>/dev/null
+	done
+
+	for dbhost in $DBTARGETS
+	do
+		ip="$IP_PREFIX.$((counter++))"
+		docker run \
+			-d \
+			-p "$ip":22:22 \
+			--name "$dbhost" \
+			-v /var/run/docker.sock:/var/run/docker.sock \
+			"$DOCKER_IMAGE_DB_NAME:latest" 1>/dev/null
+	done
+	echo "	db container has been started."
 }
 
 

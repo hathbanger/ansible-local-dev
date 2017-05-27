@@ -1,0 +1,26 @@
+FROM ubuntu:16.04
+RUN apt-get update && \
+	apt-get install locales && \
+	apt-get install -y \
+		iputils-ping \
+		openssh-server \
+		sudo \
+		vim \
+		git \
+		curl \
+		python \
+		bzr \
+		python-apt
+
+RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927
+RUN apt-get install -y --no-install-recommends software-properties-common
+RUN locale-gen en_US.UTF-8
+WORKDIR /
+RUN mkdir /var/run/sshd
+COPY id_rsa.pub /root/.ssh/authorized_keys
+
+ENV TERM xterm
+EXPOSE 22
+
+CMD ["/usr/sbin/sshd", "-D", "-4"]
+
