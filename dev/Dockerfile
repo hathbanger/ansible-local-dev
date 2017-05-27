@@ -9,6 +9,7 @@ RUN apt-get update && \
 		git \
 		curl \
 		python \
+		bzr \
 		python-apt
 RUN locale-gen en_US.UTF-8
 WORKDIR /
@@ -25,8 +26,10 @@ ENV GOPATH /work
 RUN curl https://glide.sh/get | sh
 WORKDIR /work/src/github.com/hathbanger
 RUN git clone https://github.com/hathbanger/butterfli-api.git
-WORKDIR /work/src/github.com/hathbanger/butterfli-api
-# RUN glide install
+RUN git clone https://github.com/hathbanger/ansible-local-dev.git
+WORKDIR /work/src/github.com/hathbanger/ansible-local-dev/dev
+RUN glide install
+# RUN go get .
 
 ENV TERM xterm
 EXPOSE 22

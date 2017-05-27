@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/hathbanger/butterfli-api/server"
+	"github.com/hathbanger/ansible-local-dev/dev/server"
 )
 
 func main() {

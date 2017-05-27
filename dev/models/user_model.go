@@ -5,7 +5,7 @@ import (
 	// "fmt"
 
 	"labix.org/v2/mgo/bson"
-	"github.com/hathbanger/butterfli-api/store"
+	"github.com/hathbanger/ansible-local-dev/dev/store"
 	// "github.com/butterfli-api/models"
 	//"github.com/labstack/gommon/log"
 

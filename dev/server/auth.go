@@ -2,7 +2,7 @@ package server
 
 
 import (
-	"github.com/hathbanger/butterfli-api/models"
+	"github.com/hathbanger/ansible-local-dev/dev/models"
 	// "github.com/labstack/echo"
 	"github.com/ChimeraCoder/anaconda"
 )

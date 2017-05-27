@@ -3,7 +3,7 @@ package models
 import (
 	"labix.org/v2/mgo/bson"
 	"time"
-	"github.com/hathbanger/butterfli-api/store"
+	"github.com/hathbanger/ansible-local-dev/dev/store"
 	"fmt"
 )
 
