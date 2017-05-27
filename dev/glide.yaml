@@ -2,6 +2,9 @@ package: github.com/hathbanger/ansible-local-dev/dev
 import:
 - package: github.com/ChimeraCoder/anaconda
 - package: golang.org/x/net/context
+- package: golang.org/x/net
+  subpackages:
+    - context
 - package: github.com/dgrijalva/jwt-go
   version: v3.0.0
 - package: github.com/labstack/echo
