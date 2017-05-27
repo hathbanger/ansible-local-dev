@@ -17,20 +17,18 @@ RUN rm -rf go1.6.linux-amd64.tar.gz
 RUN sudo chown -R root:root ./go && mv go /usr/local
 RUN mkdir /var/run/sshd
 COPY id_rsa.pub /root/.ssh/authorized_keys
-RUN chmod 700 /root/.ssh
-RUN chmod 400 /root/.ssh/authorized_keys
-RUN chown root. /root/.ssh/authorized_keys
-RUN mkdir -p /work/src/github.com
+RUN mkdir -p /work/src/github.com/hathbanger
 RUN mkdir -p /work/bin
-RUN mkdir -p /work/src/github.com/hathbanger/butterfli-api
 ENV GOBIN /work/bin
 ENV PATH /usr/local/go/bin:${GOBIN}:${PATH}
 ENV GOPATH /work
 RUN curl https://glide.sh/get | sh
-WORKDIR /work/src/github.com/hathbanger/butterfli-api
-# RUN go get github.com/hathbanger/twit-chatter-go
+WORKDIR /work/src/github.com/hathbanger
+RUN git clone https://github.com/hathbanger/butterfli-api.git
+# RUN glide install
+
 ENV TERM xterm
-EXPOSE 22 
+EXPOSE 22
 
 CMD ["/usr/sbin/sshd", "-D", "-4"]
 
