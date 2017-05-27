@@ -25,6 +25,7 @@ ENV GOPATH /work
 RUN curl https://glide.sh/get | sh
 WORKDIR /work/src/github.com/hathbanger
 RUN git clone https://github.com/hathbanger/butterfli-api.git
+WORKDIR /work/src/github.com/hathbanger/butterfli-api
 # RUN glide install
 
 ENV TERM xterm
