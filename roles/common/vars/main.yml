@@ -11,5 +11,4 @@ packages:
   - rsync
   - strace
   - sysstat
-  - vim
 

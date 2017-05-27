@@ -6,7 +6,7 @@ ID_RSA_FILE="$DIR/id_rsa"
 OVERRIDE_VARS_FILE="$DIR/vars.yml"
 PLAYBOOK_FILE="$DIR/../playbook.yml"
 TARGETS=$(grep '\.ans\.local' $INVENTORY_FILE | grep -v ';' | sort | uniq)
-IP_PREFIX="192.168.200"
+IP_PREFIX="192.168.150"
 DOCKER_IMAGE_NAME="ansible_local_test"
 
 
@@ -76,7 +76,6 @@ run_ansible() {
 		--inventory-file="$INVENTORY_FILE" \
 		--user=root \
 		--private-key="$ID_RSA_FILE" \
-		--inventory-file="$INVENTORY_FILE" \
 		--extra-vars="@$OVERRIDE_VARS_FILE" \
 		"$PLAYBOOK_FILE"
 }
