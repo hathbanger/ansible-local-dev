@@ -1,5 +1,12 @@
 [all]
-s1.ans.local
-s2.ans.local
-s1.db.local
+l1.lb.local
+d1.db.local
+s1.app.local
+s2.app.local
 
+[loadbalancer]
+l1.lb.local
+
+[application]
+s1.app.local
+s2.app.local

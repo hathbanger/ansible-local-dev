@@ -5,12 +5,13 @@ INVENTORY_FILE="$DIR/inventory"
 ID_RSA_FILE="$DIR/id_rsa"
 OVERRIDE_VARS_FILE="$DIR/vars.yml"
 PLAYBOOK_FILE="$DIR/../playbook.yml"
-ALLTARGETS=$(grep '\.local' $INVENTORY_FILE | grep -v ';' | sort | uniq)
-TARGETS=$(grep '\.ans\.local' $INVENTORY_FILE | grep -v ';' | sort | uniq)
+APPTARGETS=$(grep '\.app\.local' $INVENTORY_FILE | grep -v ';' | sort | uniq)
 DBTARGETS=$(grep '\.db\.local' $INVENTORY_FILE | grep -v ';' | sort | uniq)
-IP_PREFIX="192.168.150"
+TARGETS=$(grep '\.local' $INVENTORY_FILE | grep -v ';' | sort | uniq)
+IP_PREFIX="192.168.200"
 DOCKER_IMAGE_NAME="ansible_local_test"
-DOCKER_IMAGE_DB_NAME="ansible_local_test_mongo"
+DOCKER_DB_IMAGE_NAME="ansible_local_db_test"
+DOCKER_LB_IMAGE_NAME="ansible_local_lb_test"
 
 
 cleanup_test_ips() {
@@ -18,7 +19,7 @@ cleanup_test_ips() {
 	grep -v "$IP_PREFIX" /etc/hosts | sudo tee /etc/hosts 1>/dev/null
 
 	counter=1
-	for host in $ALLTARGETS
+	for host in $TARGETS
 	do
 		ip="$IP_PREFIX.$((counter++))"
 		sudo ifconfig lo0 -alias "$ip" 2>/dev/null
@@ -32,7 +33,7 @@ setup_test_ips() {
 
 	echo "Setting up ips and hosts for test containers..."
 	counter=1
-	for host in $ALLTARGETS
+	for host in $TARGETS
 	do
 		ip="$IP_PREFIX.$((counter++))"
 		sudo ifconfig lo0 alias "$ip"
@@ -43,16 +44,16 @@ setup_test_ips() {
 
 
 build_image() {
-	echo "Building test docker application image..."
-	# cd $DIR && docker build -f Dockerfile.app . 1>/dev/null
-	echo "Building test docker database image..."
-	cd $DIR && docker build -f Dockerfile.dbapp . 1>/dev/null
+	echo "Building test docker image..."
+	cd $DIR && docker build -t "$DOCKER_IMAGE_NAME:latest" -f Dockerfile.app . 1>/dev/null
+	cd $DIR && docker build -t "$DOCKER_DB_IMAGE_NAME:latest" -f Dockerfile.database . 1>/dev/null
+	cd $DIR && docker build -t "$DOCKER_LB_IMAGE_NAME:latest" -f Dockerfile.loadbalancer . 1>/dev/null
 	echo "	Done."
 }
 
 
 start_containers() {
-	echo "Starting test docker app containers..."
+	echo "Starting test docker containers..."
 	links=""
 	counter=1
 
@@ -63,33 +64,37 @@ start_containers() {
 
 	for host in $TARGETS
 	do
+		# [[ $host = 'd1.db.local' ]] && a=$DOCKER_DB_IMAGE_NAME || a=$DOCKER_IMAGE_NAME
+        if [ $host = 'd1.db.local' ]; then
+           	a=$DOCKER_DB_IMAGE_NAME
+        elif [ $host = 'l1.lb.local' ]; then
+        	a=$DOCKER_LB_IMAGE_NAME
+        else
+        	a=$DOCKER_IMAGE_NAME
+        fi		
+		echo $a
 		ip="$IP_PREFIX.$((counter++))"
+		echo $ip
 		docker run \
 			-d \
 			-p "$ip":22:22 \
 			--name "$host" \
 			-v /var/run/docker.sock:/var/run/docker.sock \
-			"$DOCKER_IMAGE_NAME:latest" 1>/dev/null
-	done
-	echo "	app containers have been started."
-
-	echo " Starting the db container"
-	for dbhost in $DBTARGETS
-	do
-		docker rm -f "$dbhost" &>/dev/null
+			"$a:latest" 1>/dev/null
 	done
 
-	for dbhost in $DBTARGETS
-	do
-		ip="$IP_PREFIX.$((counter++))"
-		docker run \
-			-d \
-			-p "$ip":22:22 \
-			--name "$dbhost" \
-			-v /var/run/docker.sock:/var/run/docker.sock \
-			"$DOCKER_IMAGE_DB_NAME:latest" 1>/dev/null
-	done
-	echo "	db container has been started."
+	# for host in $DBTARGETS
+	# do
+	# 	ip="$IP_PREFIX.$((counter++))"
+	# 	docker run \
+	# 		-d \
+	# 		-p "$ip":22:22 \
+	# 		--name "$host" \
+	# 		-v /var/run/docker.sock:/var/run/docker.sock \
+	# 		"$DOCKER_DB_IMAGE_NAME:latest" 1>/dev/null
+	# done
+
+	echo "	Done."
 }
 
 
@@ -106,11 +111,8 @@ run_ansible() {
 
 usage() {
 	cat <<END
-
 Usage: $0 [OPTIONS]
-
 Run ansible towards docker containers.
-
 Options:
    -f, --force	 : Recreate docker image and containers before running.
    -c, --cleanup : Remove aliases and hosts entries of containers after test.

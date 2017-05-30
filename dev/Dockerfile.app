@@ -11,13 +11,6 @@ RUN apt-get update && \
 		python \
 		bzr \
 		python-apt
-
-RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927
-RUN apt-get install -y --no-install-recommends software-properties-common
-RUN echo "deb http://repo.mongodb.org/apt/ubuntu $(cat /etc/lsb-release | grep DISTRIB_CODENAME | cut -d= -f2)/mongodb-org/3.2 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-3.2.list
-RUN apt-get update && apt-get install -y mongodb-org
-RUN mkdir -p /data/db
-RUN mongod --fork --logpath /var/log/mongodb.log
 RUN locale-gen en_US.UTF-8
 WORKDIR /
 RUN curl -O https://storage.googleapis.com/golang/go1.6.linux-amd64.tar.gz && tar xvf go1.6.linux-amd64.tar.gz
@@ -35,12 +28,11 @@ WORKDIR /work/src/github.com/hathbanger
 RUN git clone https://github.com/hathbanger/ansible-local-dev.git
 WORKDIR /work/src/github.com/hathbanger/ansible-local-dev/dev
 RUN glide install
-# RUN go run main.go
+RUN go install github.com/hathbanger/ansible-local-dev/dev
+RUN go build github.com/hathbanger/ansible-local-dev/dev
 
-# RUN mongod -d
 
 ENV TERM xterm
-EXPOSE 22
+EXPOSE 22 1323
 
 CMD ["/usr/sbin/sshd", "-D", "-4"]
-

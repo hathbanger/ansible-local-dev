@@ -1,0 +1,15 @@
+---
+
+- name: adding templated file
+  template:
+    src: templates/butterfli-api.service.j2
+    dest: /etc/systemd/system/butterfli-api.service
+    owner: root
+    group: root
+    mode: 0644
+
+- name: triggering systemd
+  systemd:
+    name: butterfli-api
+    state: started
+    enabled: True

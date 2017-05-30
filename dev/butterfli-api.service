@@ -1,0 +1,11 @@
+[Unit]
+Description=Butterfli-api service
+
+[Service]
+Type=Type=forking
+ExecStart=/work/bin/dev
+WatchdogSec=30s
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

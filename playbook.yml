@@ -4,3 +4,12 @@
   hosts: all
   roles:
     - common
+- name: Setup nginx on LB
+  hosts: loadbalancer
+  roles:
+    - geerlingguy.nginx
+
+# - name: systemd
+#   hosts: application
+#   roles:
+#     - hathbanger.systemd
