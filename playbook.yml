@@ -9,7 +9,7 @@
   roles:
     - geerlingguy.nginx
 
-# - name: systemd
-#   hosts: application
-#   roles:
-#     - hathbanger.systemd
+- name: Start GO APP
+  hosts: application
+  roles:
+    - hathbanger.startApp
